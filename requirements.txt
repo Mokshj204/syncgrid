@@ -1,0 +1,2 @@
+# Root requirements reference for backend-python
+-r backend-python/requirements.txt

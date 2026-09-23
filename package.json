@@ -1,0 +1,37 @@
+{
+  "name": "sheets-web-sync",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-Time Google Sheets ↔ Web Synchronization (React + Node.js + Python)",
+  "workspaces": [
+    "frontend",
+    "backend-node"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"NODE,VITE\" -c \"cyan.bold,green.bold\" \"npm run dev:node\" \"npm run dev:frontend\"",
+    "dev:node": "npm run dev --workspace=backend-node",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:python": "uv run --project backend-python python -m app.main",
+    "build": "npm run build --workspace=frontend",
+    "start": "npm run start --workspace=backend-node",
+    "db:seed": "npm run db:seed --workspace=backend-node",
+    "db:reset": "npm run db:reset --workspace=backend-node"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "google-sheets",
+    "realtime",
+    "websocket",
+    "react",
+    "nodejs",
+    "fastapi",
+    "python"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0"
+  }
+}
