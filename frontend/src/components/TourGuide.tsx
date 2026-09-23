@@ -58,7 +58,7 @@ const TOUR_STEPS: TourStep[] = [
     icon: <Table size={18} color="#10b981" />,
   },
   {
-    target: '#tour-history',
+    target: '',
     titleKey: 'tourStep7Title',
     descKey: 'tourStep7Desc',
     icon: <Activity size={18} color="#ec4899" />,
@@ -74,7 +74,7 @@ export const TourGuide: React.FC<TourGuideProps> = ({ isOpen, onClose }) => {
   const updatePosition = useCallback(() => {
     if (!isOpen) return;
     const step = TOUR_STEPS[currentStep];
-    const el = document.querySelector(step.target);
+    const el = step?.target ? document.querySelector(step.target) : null;
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       const bounds = el.getBoundingClientRect();
