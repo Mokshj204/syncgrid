@@ -177,7 +177,14 @@ To connect live Google Sheets synchronization:
    - Add the service account email (e.g. `sheets-sync-worker@<project-id>.iam.gserviceaccount.com`) as an **Editor**.
    - Copy the Spreadsheet ID from the URL:
      `https://docs.google.com/spreadsheets/d/`**`<SPREADSHEET_ID>`**`/edit`
-   - Paste the ID into `SPREADSHEET_ID` in your `.env` or enter it via the web app's live status manager.
+
+6. **Configure Spreadsheet ID (2 Options)**:
+   - **Option A (Web Interface - Recommended)**: Navigate to the **`/overview`** route in your browser (e.g. `http://localhost:5173/overview` or `https://syncgrid.intalix.in/overview`).
+     - Enter your **Spreadsheet ID** and target **Sheet Name** (default: `Sheet1`).
+     - Click **Save Configuration** (persisted dynamically in PostgreSQL with no server restart needed).
+     - Click **Test Connection** to immediately verify live Google API connectivity.
+     - Use **Force Bidirectional Sync** whenever you want to trigger a manual sync pass.
+   - **Option B (Environment Variable)**: Paste the ID into `SPREADSHEET_ID` in your root `.env` file (`SPREADSHEET_ID=your_id_here`).
 
 ---
 
@@ -273,6 +280,8 @@ cd backend-python
 npm run dev
 ```
 Open your browser at **`http://localhost:5173`**.
+- Navigate to **`http://localhost:5173/overview`** (or click the **Overview / Settings** button in the top navigation bar) to connect your Google Sheet and test connectivity.
+- Navigate to **`http://localhost:5173`** for the interactive real-time collaborative grid.
 
 ---
 
