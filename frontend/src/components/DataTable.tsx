@@ -687,7 +687,7 @@ export const DataTable: React.FC<DataTableProps> = ({
             className="form-control"
             style={{ flex: 1, height: '30px', fontSize: '0.84rem', fontFamily: 'var(--font-mono)', minWidth: '160px' }}
             value={activeCellRawValue}
-            placeholder="Type value or formula (=SUM, =A1+B1)..."
+            placeholder="Type cell value to sync..."
             onChange={(e) => {
               if (!editingCell) {
                 handleStartEdit(activeCell.rowId, activeCell.col);
@@ -975,10 +975,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                               </span>
                             ) : (
                               <span 
-                                title={rawVal.startsWith('=') ? `${rawVal} = ${formatted.display}` : formatted.display}
-                                style={{
-                                  color: formatted.display.startsWith('#') ? 'var(--accent-rose)' : undefined,
-                                }}
+                                title={rawVal}
                               >
                                 {formatted.display}
                               </span>

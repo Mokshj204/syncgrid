@@ -264,7 +264,7 @@ export const translations: Record<Language, Translations> = {
     tourStep5Title: 'Live Metrics & Chunked Windows',
     tourStep5Desc: 'Displays total rows synced, dynamic column counts, and chunk pagination windows so large sheets never overwhelm browser memory.',
     tourStep6Title: 'Interactive Spreadsheet Grid',
-    tourStep6Desc: 'Click or double-click any cell to edit directly inline or use the formula bar above. Navigate with arrow keys, and see live colored cursor badges and real-time typing indicators when teammates collaborate!',
+    tourStep6Desc: 'Click or double-click any cell to edit directly inline or use the input bar above. Navigate with arrow keys, and see live colored cursor badges and real-time typing indicators when teammates collaborate!',
     tourStep7Title: 'Audit & Synchronization History',
     tourStep7Desc: 'Click the "History" button in the top navigation bar at any time to open the complete live event stream, showing every edit, Google Sheets sync, and webhook trigger.',
 
@@ -412,7 +412,7 @@ export const translations: Record<Language, Translations> = {
     tourStep5Title: 'लाइव मेट्रिक्स और चंक विंडो',
     tourStep5Desc: 'यहाँ कुल सिंक की गई पंक्तियाँ, डायनामिक कॉलम और चंक पेजिनेशन दिखाई देते हैं ताकि बड़ी शीट्स से ब्राउज़र धीमा न हो।',
     tourStep6Title: 'इंटरैक्टिव स्प्रेडशीट ग्रिड',
-    tourStep6Desc: 'किसी भी सेल पर क्लिक या डबल-क्लिक करके सीधे इनलाइन संपादित करें या ऊपर दिए गए फॉर्मूला बार का उपयोग करें। तीर कुंजियों से नेविगेट करें और जब साथी काम कर रहे हों तो उनके लाइव रंगीन कर्सर देखें!',
+    tourStep6Desc: 'किसी भी सेल पर क्लिक या डबल-क्लिक करके सीधे इनलाइन संपादित करें या ऊपर दिए गए सेल इनपुट बार का उपयोग करें। तीर कुंजियों से नेविगेट करें और जब साथी काम कर रहे हों तो उनके लाइव रंगीन कर्सर देखें!',
     tourStep7Title: 'ऑडिट और सिंक्रोनाइज़ेशन हिस्ट्री',
     tourStep7Desc: 'शीर्ष नेविगेशन बार में "हिस्ट्री" बटन पर क्लिक करके हर स्प्रेडशीट संपादन, गूगल शीट्स सिंक और वेबहुक इवेंट का पूरा लाइव स्ट्रीम देखें।',
 

@@ -66,205 +66,14 @@ export function getCellValue(ref: string, rowMap: Map<number, TableRow>): string
 }
 
 /**
- * Safe, non-eval formula evaluation for expressions starting with '='
+ * Formula evaluation (Pass-through: formula math calculations disabled, syncs raw cell values directly)
  */
 export function evaluateFormula(
   expr: string,
-  rowMap: Map<number, TableRow>,
-  visited: Set<string> = new Set()
+  _rowMap?: Map<number, TableRow>,
+  _visited?: Set<string>
 ): string {
-  if (!expr.startsWith('=')) return expr;
-
-  const raw = expr.slice(1).trim();
-  if (!raw) return '';
-
-  try {
-    // 1. Function evaluation: SUM, AVERAGE, COUNT, MIN, MAX
-    const fnMatch = raw.match(/^(SUM|AVERAGE|AVG|COUNT|MIN|MAX)\((.*)\)$/i);
-    if (fnMatch) {
-      const fnName = fnMatch[1].toUpperCase();
-      const argsStr = fnMatch[2];
-      const argTokens = argsStr.split(',').map((s) => s.trim());
-
-      const values: number[] = [];
-      for (const token of argTokens) {
-        if (token.includes(':')) {
-          const cells = expandRange(token);
-          for (const c of cells) {
-            if (visited.has(c)) return '#CYCLE!';
-            const nextVisited = new Set(visited);
-            nextVisited.add(c);
-            const valStr = getCellValue(c, rowMap);
-            const resolved = valStr.startsWith('=')
-              ? evaluateFormula(valStr, rowMap, nextVisited)
-              : valStr;
-            if (resolved === '#CYCLE!') return '#CYCLE!';
-            const num = parseFloat(resolved.replace(/[^0-9.-]/g, ''));
-            if (!isNaN(num)) values.push(num);
-          }
-        } else {
-          const cellCoord = parseCellCoord(token);
-          if (cellCoord) {
-            const c = token.toUpperCase();
-            if (visited.has(c)) return '#CYCLE!';
-            const nextVisited = new Set(visited);
-            nextVisited.add(c);
-            const valStr = getCellValue(c, rowMap);
-            const resolved = valStr.startsWith('=')
-              ? evaluateFormula(valStr, rowMap, nextVisited)
-              : valStr;
-            if (resolved === '#CYCLE!') return '#CYCLE!';
-            const num = parseFloat(resolved.replace(/[^0-9.-]/g, ''));
-            if (!isNaN(num)) values.push(num);
-          } else {
-            const num = parseFloat(token);
-            if (!isNaN(num)) values.push(num);
-          }
-        }
-      }
-
-      if (fnName === 'SUM') {
-        const sum = values.reduce((acc, v) => acc + v, 0);
-        return String(Math.round(sum * 10000) / 10000);
-      }
-      if (fnName === 'AVERAGE' || fnName === 'AVG') {
-        if (values.length === 0) return '0';
-        const avg = values.reduce((acc, v) => acc + v, 0) / values.length;
-        return String(Math.round(avg * 10000) / 10000);
-      }
-      if (fnName === 'COUNT') {
-        return String(values.length);
-      }
-      if (fnName === 'MIN') {
-        if (values.length === 0) return '0';
-        return String(Math.min(...values));
-      }
-      if (fnName === 'MAX') {
-        if (values.length === 0) return '0';
-        return String(Math.max(...values));
-      }
-    }
-
-    // 2. Safe Arithmetic Expression: e.g. A1 + B1, A1 * 2, (10 + 20) / 2
-    // Substitute cell identifiers with their evaluated numerical value
-    const cellRefRegex = /\b[A-Z]+[0-9]+\b/gi;
-    let hasCycle = false;
-    const substituted = raw.replace(cellRefRegex, (ref) => {
-      const upperRef = ref.toUpperCase();
-      if (visited.has(upperRef)) {
-        hasCycle = true;
-        return '0';
-      }
-      const nextVisited = new Set(visited);
-      nextVisited.add(upperRef);
-      const valStr = getCellValue(upperRef, rowMap);
-      const resolved = valStr.startsWith('=')
-        ? evaluateFormula(valStr, rowMap, nextVisited)
-        : valStr;
-      if (resolved === '#CYCLE!') {
-        hasCycle = true;
-        return '0';
-      }
-      const num = parseFloat(resolved.replace(/[^0-9.-]/g, ''));
-      return isNaN(num) ? '0' : String(num);
-    });
-
-    if (hasCycle) return '#CYCLE!';
-
-    // Tokenize arithmetic expression safely without eval
-    const safeResult = evaluateArithmetic(substituted);
-    return isNaN(safeResult) ? '#VALUE!' : String(Math.round(safeResult * 10000) / 10000);
-  } catch {
-    return '#ERROR!';
-  }
-}
-
-/**
- * Safe arithmetic evaluator without eval (Shunting-Yard + RPN calculation)
- */
-function evaluateArithmetic(expr: string): number {
-  // Only allow digits, operators, parentheses, decimal points, spaces
-  if (!/^[\d\s+\-*/().%]+$/.test(expr)) {
-    return NaN;
-  }
-
-  const tokens: string[] = [];
-  let numBuf = '';
-
-  for (let i = 0; i < expr.length; i++) {
-    const ch = expr[i];
-    if (ch === ' ') continue;
-
-    if ((ch >= '0' && ch <= '9') || ch === '.') {
-      numBuf += ch;
-    } else {
-      if (numBuf) {
-        tokens.push(numBuf);
-        numBuf = '';
-      }
-      if ('+-*/()'.includes(ch)) {
-        // Handle unary minus: e.g. -5 or (-5)
-        if (ch === '-' && (tokens.length === 0 || tokens[tokens.length - 1] === '(')) {
-          numBuf = '-';
-        } else {
-          tokens.push(ch);
-        }
-      }
-    }
-  }
-  if (numBuf) tokens.push(numBuf);
-
-  // Convert to RPN using Shunting-Yard algorithm
-  const precedence: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2 };
-  const outputQueue: string[] = [];
-  const opStack: string[] = [];
-
-  for (const token of tokens) {
-    if (!isNaN(Number(token))) {
-      outputQueue.push(token);
-    } else if ('+-*/'.includes(token)) {
-      while (
-        opStack.length > 0 &&
-        opStack[opStack.length - 1] !== '(' &&
-        precedence[opStack[opStack.length - 1]] >= precedence[token]
-      ) {
-        outputQueue.push(opStack.pop()!);
-      }
-      opStack.push(token);
-    } else if (token === '(') {
-      opStack.push(token);
-    } else if (token === ')') {
-      while (opStack.length > 0 && opStack[opStack.length - 1] !== '(') {
-        outputQueue.push(opStack.pop()!);
-      }
-      opStack.pop(); // discard '('
-    }
-  }
-  while (opStack.length > 0) {
-    outputQueue.push(opStack.pop()!);
-  }
-
-  // Calculate RPN
-  const evalStack: number[] = [];
-  for (const token of outputQueue) {
-    if (!isNaN(Number(token))) {
-      evalStack.push(parseFloat(token));
-    } else {
-      const b = evalStack.pop() ?? 0;
-      const a = evalStack.pop() ?? 0;
-      switch (token) {
-        case '+': evalStack.push(a + b); break;
-        case '-': evalStack.push(a - b); break;
-        case '*': evalStack.push(a * b); break;
-        case '/':
-          if (b === 0) return NaN; // Division by zero
-          evalStack.push(a / b);
-          break;
-      }
-    }
-  }
-
-  return evalStack.length > 0 ? evalStack[0] : 0;
+  return expr;
 }
 
 /**
@@ -289,23 +98,14 @@ export function formatNumber(
 export function formatCellValue(
   rawVal: string,
   format?: CellFormat,
-  rowMap?: Map<number, TableRow>
+  _rowMap?: Map<number, TableRow>
 ): { display: string; isNumeric: boolean; isFormula: boolean } {
   if (!rawVal && rawVal !== '0') {
     return { display: '', isNumeric: false, isFormula: false };
   }
 
   const isFormula = rawVal.startsWith('=');
-  let effectiveVal = rawVal;
-
-  if (isFormula && rowMap) {
-    effectiveVal = evaluateFormula(rawVal, rowMap);
-  }
-
-  // If evaluation returned an error string, show it immediately
-  if (effectiveVal.startsWith('#')) {
-    return { display: effectiveVal, isNumeric: false, isFormula: true };
-  }
+  const effectiveVal = rawVal;
 
   const formatType = format?.type || 'general';
   const decimals = format?.decimals !== undefined ? format.decimals : 2;
