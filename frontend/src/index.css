@@ -1,0 +1,766 @@
+/* Clean, Professional Spreadsheet Theme (Dark Gray & Offwhite) */
+:root {
+  /* Dark Mode Default (Clean Dark Gray, No Blue Gradients) */
+  --bg-page: #121214;
+  --bg-surface: #1e1e22;
+  --bg-surface-secondary: #27272b;
+  --bg-toolbar: #18181c;
+  --border-color: #323238;
+  --border-subtle: #27272b;
+
+  --text-main: #f4f4f6;
+  --text-muted: #a1a1aa;
+  --text-dim: #71717a;
+
+  --accent-green: #10b981;
+  --accent-blue: #3b82f6;
+  --accent-amber: #f59e0b;
+  --accent-rose: #ef4444;
+
+  --grid-border: #2e2e34;
+  --grid-header-bg: #222227;
+  --grid-header-text: #a1a1aa;
+  --grid-cell-bg: #18181c;
+  --grid-cell-hover: #232329;
+  --grid-row-idx-bg: #1f1f24;
+
+  --input-bg: #121214;
+  --input-border: #3f3f46;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --radius: 6px;
+}
+
+[data-theme="light"] {
+  /* Offwhite Light Mode (Pure, Clean Human UI with Black/Charcoal Text) */
+  --bg-page: #f8f9fa;
+  --bg-surface: #ffffff;
+  --bg-surface-secondary: #f1f3f5;
+  --bg-toolbar: #f8f9fa;
+  --border-color: #e2e8f0;
+  --border-subtle: #cbd5e1;
+
+  --text-main: #111827;
+  --text-muted: #4b5563;
+  --text-dim: #9ca3af;
+
+  --grid-border: #e2e8f0;
+  --grid-header-bg: #f1f5f9;
+  --grid-header-text: #475569;
+  --grid-cell-bg: #ffffff;
+  --grid-cell-hover: #f8fafc;
+  --grid-row-idx-bg: #f8fafc;
+
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Base Container */
+.app-container {
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Compact Single Top Navbar */
+.compact-navbar {
+  height: 52px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sheet-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  box-shadow: 0 0 6px var(--accent-green);
+  display: inline-block;
+}
+
+.status-dot.syncing {
+  background: var(--accent-amber);
+  box-shadow: 0 0 6px var(--accent-amber);
+  animation: pulse 1s infinite;
+}
+
+.status-dot.disconnected {
+  background: var(--accent-rose);
+  box-shadow: 0 0 6px var(--accent-rose);
+}
+
+.nav-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Common Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface-secondary);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--text-main);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #ffffff !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+  background: var(--accent-green);
+}
+
+.btn-action-indigo {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #ffffff !important;
+}
+
+.btn-action-indigo:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--accent-rose);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--accent-rose);
+  color: #ffffff;
+}
+
+.btn-icon {
+  padding: 6px;
+}
+
+/* User Identity Pill in Navbar */
+.user-identity-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.user-avatar-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+/* Spreadsheet Layout */
+.spreadsheet-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 12px 16px 24px;
+  gap: 12px;
+}
+
+/* Excel Ribbon Toolbar */
+.excel-ribbon-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.ribbon-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 12px;
+  border-right: 1px solid var(--border-color);
+}
+
+.ribbon-group:last-child,
+.ribbon-group.ribbon-group-right {
+  border-right: none;
+  padding-right: 0;
+  margin-left: auto;
+}
+
+.ribbon-group-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.ribbon-control-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.excel-type-select {
+  height: 28px;
+  padding: 2px 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-main);
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  min-width: 170px;
+}
+
+.excel-type-select:focus {
+  border-color: var(--accent-blue);
+}
+
+.ribbon-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ribbon-btn {
+  height: 28px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.ribbon-btn:hover {
+  background: var(--border-color);
+  color: var(--text-main);
+}
+
+.ribbon-btn.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #ffffff;
+}
+
+.formula-tip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  background: var(--bg-toolbar);
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-subtle);
+  user-select: none;
+}
+
+.cell-type-pill {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--bg-toolbar);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  user-select: none;
+}
+
+/* Excel Style Formula / Actions Toolbar */
+.excel-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+}
+
+.excel-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.excel-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cell-name-box {
+  min-width: 55px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-toolbar);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Spreadsheet Grid View */
+.sheet-grid-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  font-family: var(--font-sans);
+  table-layout: fixed;
+}
+
+/* Corner Header */
+.excel-table th.corner-cell {
+  width: 52px;
+  min-width: 52px;
+  background: var(--grid-header-bg);
+  border-right: 1px solid var(--grid-border);
+  border-bottom: 1px solid var(--grid-border);
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--grid-header-text);
+  user-select: none;
+}
+
+/* Column Header (A, B, C...) */
+.excel-table th.col-header-cell {
+  background: var(--grid-header-bg);
+  color: var(--grid-header-text);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 8px 12px;
+  border-right: 1px solid var(--grid-border);
+  border-bottom: 1px solid var(--grid-border);
+  user-select: none;
+  min-width: 60px;
+  position: relative;
+}
+
+/* Excel Interactive Column Resize Handle */
+.col-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  user-select: none;
+  touch-action: none;
+}
+
+.col-resize-handle:hover,
+.col-resize-handle.is-resizing {
+  background-color: var(--accent-blue, #3b82f6);
+  opacity: 0.85;
+}
+
+/* Excel Add Column Header (+) */
+.excel-table th.col-header-add-cell {
+  background: var(--grid-header-bg);
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 6px 12px;
+  border-right: 1px solid var(--grid-border);
+  border-bottom: 1px solid var(--grid-border);
+  user-select: none;
+  width: 48px;
+  min-width: 48px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.excel-table th.col-header-add-cell:hover {
+  background: var(--bg-surface-secondary);
+  color: var(--accent-green);
+}
+
+/* Row Header (1, 2, 3...) */
+.excel-table td.row-header-cell {
+  background: var(--grid-row-idx-bg);
+  color: var(--grid-header-text);
+  text-align: center;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  border-right: 1px solid var(--grid-border);
+  border-bottom: 1px solid var(--grid-border);
+  user-select: none;
+  width: 52px;
+  position: relative;
+}
+
+/* Excel Interactive Row Resize Handle */
+.row-resize-handle {
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 7px;
+  cursor: row-resize;
+  z-index: 20;
+  user-select: none;
+  touch-action: none;
+}
+
+.row-resize-handle:hover,
+.row-resize-handle.is-resizing {
+  background-color: var(--accent-blue, #3b82f6);
+  opacity: 0.85;
+}
+
+/* Data Cell */
+.excel-table td.data-cell {
+  background: var(--grid-cell-bg);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-right: 1px solid var(--grid-border);
+  border-bottom: 1px solid var(--grid-border);
+  position: relative;
+  transition: background 0.12s ease;
+  word-break: break-word;
+}
+
+/* Real-time remote collaborator typing cursor */
+.live-typing-cursor {
+  display: inline-block;
+  font-weight: 700;
+  margin-left: 2px;
+  animation: blinkTypingCursor 0.75s infinite;
+}
+
+@keyframes blinkTypingCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.excel-table td.data-cell:hover {
+  background: var(--grid-cell-hover);
+}
+
+.excel-table td.actions-cell {
+  border-bottom: 1px solid var(--grid-border);
+  padding: 4px 10px;
+  width: 130px;
+  text-align: right;
+  background: var(--grid-cell-bg);
+}
+
+/* Inline Edit Input */
+.excel-inline-input {
+  width: 100%;
+  border: 1.5px solid var(--accent-blue);
+  background: var(--input-bg);
+  color: var(--text-main);
+  padding: 4px 8px;
+  font-size: 0.84rem;
+  font-family: inherit;
+  border-radius: 4px;
+  outline: none;
+}
+
+/* Form Controls */
+.form-control {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-main);
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  border-radius: var(--radius);
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: var(--accent-blue);
+}
+
+/* Form Group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-content {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 580px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  color: var(--text-main);
+}
+
+.modal-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-footer {
+  padding: 12px 20px;
+  background: var(--bg-toolbar);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Activity Audit Panel */
+.activity-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.activity-section-header {
+  padding: 10px 16px;
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.activity-list {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.8rem;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+/* Glass panel fallback */
+.glass-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  font-size: 0.76rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface-secondary);
+  color: var(--text-muted);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-toolbar);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
