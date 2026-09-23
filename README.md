@@ -160,9 +160,10 @@ To connect live Google Sheets synchronization:
 
 1. **Create a Google Cloud Project**:
    - Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
-2. **Enable the Google Sheets API**:
+2. **Enable the Google Sheets API & Google Drive API**:
    - Navigate to **APIs & Services > Library**.
    - Search for **Google Sheets API** and click **Enable**.
+   - Search for **Google Drive API** and click **Enable** (required: `gspread` and the Python service require the Google Drive API to locate spreadsheets, verify permissions, and fetch sheet metadata).
 3. **Create a Service Account**:
    - Navigate to **APIs & Services > Credentials**.
    - Click **Create Credentials > Service Account**.
