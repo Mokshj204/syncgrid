@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   FileSpreadsheet, 
   RefreshCw, 
-  Sparkles, 
   Compass, 
   Languages, 
   Sun, 
@@ -22,7 +21,7 @@ interface NavbarProps {
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
   onForceSync: () => void;
-  onOpenSimulate: () => void;
+  onOpenSimulate?: () => void;
   onOpenDocs?: () => void;
   onOpenTour?: () => void;
   currentCollaborator: Collaborator | null;
@@ -40,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   theme,
   onToggleTheme,
   onForceSync,
-  onOpenSimulate,
+  onOpenSimulate: _onOpenSimulate,
   onOpenDocs: _onOpenDocs,
   onOpenTour,
   currentCollaborator,
@@ -94,15 +93,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <RefreshCw size={13} className={isSyncing ? 'spin-icon' : ''} />
           <span>{isSyncing ? t('syncing') : t('forceSyncBtn')}</span>
-        </button>
-
-        <button 
-          className="btn btn-sm"
-          onClick={onOpenSimulate}
-          title="Simulate someone editing a cell in Google Sheets"
-        >
-          <Sparkles size={13} color="#818cf8" />
-          <span>{t('simulateBtn')}</span>
         </button>
 
         <button

@@ -583,7 +583,6 @@ export const AppContent: React.FC = () => {
         theme={theme}
         onToggleTheme={toggleTheme}
         onForceSync={handleForceSync}
-        onOpenSimulate={() => setIsSimulateOpen(true)}
         onOpenDocs={() => setIsDocsOpen(true)}
         onOpenTour={() => setIsTourOpen(true)}
         currentCollaborator={currentCollaborator}
