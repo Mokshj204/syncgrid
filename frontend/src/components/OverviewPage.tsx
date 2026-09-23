@@ -8,7 +8,6 @@ import {
   ExternalLink, 
   RefreshCw, 
   Save, 
-  Layers, 
   ShieldCheck,
   Sliders,
   Sparkles
@@ -545,24 +544,6 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
         </form>
       </div>
 
-      {/* Architecture Rationale Callout */}
-      <div style={{
-        marginTop: '20px',
-        padding: '14px 18px',
-        borderRadius: '6px',
-        background: 'var(--bg-surface-secondary)',
-        border: '1px solid var(--border-subtle)',
-        fontSize: '0.78rem',
-        color: 'var(--text-muted)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '10px',
-      }}>
-        <Layers size={16} color="#818cf8" style={{ marginTop: '2px', flexShrink: 0 }} />
-        <div>
-          <b style={{ color: 'var(--text-main)' }}>Architectural Decision (TypeSafe AI / Jev Evaluated):</b> Google Sheets connection credentials are fully decoupled from environment variables and persisted into PostgreSQL table <span style={{ fontFamily: 'var(--font-mono)' }}>google_sheets_config</span>. This enables instant runtime sheet switching, zero backend downtime, and atomic synchronization with cloud PostgreSQL.
-        </div>
-      </div>
     </div>
   );
 };
