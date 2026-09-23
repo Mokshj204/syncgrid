@@ -10,12 +10,11 @@ import {
   Save, 
   Layers, 
   ShieldCheck,
-  Radio,
   Sliders,
   Sparkles
 } from 'lucide-react';
 import { GoogleSheetsConfig, DatabaseStats, SheetsConfigResponse } from '../types';
-import { getSheetsConfig, saveSheetsConfig, testSheetsConnection, forceSync } from '../services/api';
+import { getSheetsConfig, saveSheetsConfig, testSheetsConnection } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 
 interface OverviewPageProps {
@@ -45,7 +44,6 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isTesting, setIsTesting] = useState<boolean>(false);
-  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   // Form input fields
   const [spreadsheetIdInput, setSpreadsheetIdInput] = useState<string>('');
@@ -175,27 +173,6 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
     }
   };
 
-  // Handle Force Sync
-  const handleTriggerSync = async () => {
-    try {
-      setIsSyncing(true);
-      await forceSync();
-      setFeedback({
-        type: 'success',
-        message: 'Manual sync cycle executed successfully.',
-      });
-      await fetchOverviewData();
-    } catch (err: any) {
-      setFeedback({
-        type: 'error',
-        message: 'Manual sync execution failed.',
-        details: err.message,
-      });
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
   // Disconnect Google Sheets
   const handleDisconnectSheet = async () => {
     setSpreadsheetIdInput('');
@@ -251,14 +228,6 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
           >
             <RefreshCw size={13} className={isLoading ? 'spin-icon' : ''} />
             <span>Refresh</span>
-          </button>
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={handleTriggerSync}
-            disabled={isSyncing}
-          >
-            <Radio size={13} className={isSyncing ? 'spin-icon' : ''} />
-            <span>{isSyncing ? 'Syncing...' : 'Force Sync Now'}</span>
           </button>
         </div>
       </div>

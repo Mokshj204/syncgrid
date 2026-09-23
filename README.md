@@ -181,9 +181,9 @@ To connect live Google Sheets synchronization:
 6. **Configure Spreadsheet ID via `/overview`**:
    - Open your browser and navigate to the **`/overview`** route (e.g. `http://localhost:5173/overview` or `https://syncgrid.intalix.in/overview`), or click **Overview / Settings** in the top navigation bar.
    - Enter your **Spreadsheet ID** and target **Sheet Name** (default: `Sheet1`).
-   - Click **Save Configuration** (persisted dynamically in PostgreSQL and automatically synchronized with Node.js and Python with zero server restarts required).
+   - Click **Save Configuration** (persisted dynamically in PostgreSQL with zero server restarts required).
    - Click **Test Connection** to immediately verify live Google API connectivity.
-   - Use **Force Bidirectional Sync** whenever you want to trigger an instant full sync pass.
+   - Use the **Force Sync** button in the top navigation bar whenever you want to trigger an instant sync pass.
 
 ---
 
