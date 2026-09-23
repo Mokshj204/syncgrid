@@ -12,8 +12,7 @@ import {
   Clock, 
   ChevronDown, 
   ChevronUp,
-  RefreshCw,
-  Activity
+  RefreshCw
 } from 'lucide-react';
 import { ActivityLog } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -74,19 +73,6 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
-
-  // Statistics calculation
-  const stats = useMemo(() => {
-    let web = 0;
-    let sheets = 0;
-    let webhook = 0;
-    logs.forEach((l) => {
-      if (l.source === 'web') web++;
-      else if (l.source === 'google_apps_script') webhook++;
-      else sheets++;
-    });
-    return { total: logs.length, web, sheets, webhook };
-  }, [logs]);
 
   // Filtering
   const filteredLogs = useMemo(() => {
@@ -204,41 +190,6 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
             <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)' }}>
               {t('historySubtitle')}
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Stat Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '20px' }}>
-        <div className="glass-panel" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Activity size={22} color="var(--accent-blue)" />
-          <div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>{t('historyTotalEvents')}</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.total}</div>
-          </div>
-        </div>
-
-        <div className="glass-panel" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <FileSpreadsheet size={22} color="#38bdf8" />
-          <div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>{t('historyGoogleSheets')}</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.sheets}</div>
-          </div>
-        </div>
-
-        <div className="glass-panel" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Globe size={22} color="#10b981" />
-          <div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>{t('historyWebEdits')}</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.web}</div>
-          </div>
-        </div>
-
-        <div className="glass-panel" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Zap size={22} color="#818cf8" />
-          <div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 600 }}>{t('historyWebhooks')}</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{stats.webhook}</div>
           </div>
         </div>
       </div>
