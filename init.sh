@@ -278,7 +278,7 @@ if [ "$PACKAGE_MANAGER" = "uv" ]; then
     else
         log_ok "Virtual environment already exists at $VENV_DIR"
     fi
-    uv pip install --project backend-python -r "$REQ_FILE"
+    uv pip install --python "$VENV_DIR" -r "$REQ_FILE"
     log_ok "Python dependencies installed via uv."
 else
     log_info "Using pip to manage virtual environment and dependencies..."

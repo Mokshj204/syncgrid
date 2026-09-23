@@ -268,7 +268,7 @@ if ($pkgManager -eq "uv") {
         Write-Ok "Virtual environment already exists at $venvDir"
     }
     
-    & uv pip install --project "$RepoRoot\backend-python" -r "$reqFile"
+    & uv pip install --python "$venvDir" -r "$reqFile"
     if ($LASTEXITCODE -ne 0) {
         Write-ErrMsg "Failed to install Python dependencies via uv."
         exit $LASTEXITCODE
