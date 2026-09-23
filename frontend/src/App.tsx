@@ -275,31 +275,29 @@ export const AppContent: React.FC = () => {
         return;
       }
 
-      if (payload.rows && Array.isArray(payload.rows) && payload.rows.length > 0) {
-        // Clean sync: update rows from Google Sheets without resurrecting deleted columns
-        setRows((prev) => {
-          const rowMap = new Map(prev.map((r) => [r.rowId, r]));
-          for (const remoteRow of payload.rows) {
-            const rawCells = remoteRow.cells || remoteRow;
-            const cleanCells: Record<string, string> = {};
-            if (rawCells && typeof rawCells === 'object') {
-              for (const [k, v] of Object.entries(rawCells)) {
-                if (k !== 'rowId' && k !== 'cells' && k !== 'version' && k !== 'updated_at') {
-                  cleanCells[k] = v !== null && v !== undefined ? String(v) : '';
+      if (Array.isArray(payload.rows)) {
+        // Clean sync: update rows from Google Sheets without ghost rows or resurrecting deleted cells
+        const newRows: TableRow[] = payload.rows.map((remoteRow: any) => {
+          const rawCells = remoteRow.cells || remoteRow;
+          const cleanCells: Record<string, string> = {};
+          if (rawCells && typeof rawCells === 'object') {
+            for (const [k, v] of Object.entries(rawCells)) {
+              if (k !== 'rowId' && k !== 'cells' && k !== 'version' && k !== 'updated_at' && k !== 'updatedAt') {
+                if (v !== null && v !== undefined && String(v).trim() !== '') {
+                  cleanCells[k] = String(v);
                 }
               }
             }
-
-            const cleanRow: TableRow = {
-              rowId: remoteRow.rowId,
-              cells: cleanCells,
-              version: remoteRow.version || 'v1',
-              ...cleanCells,
-            };
-            rowMap.set(remoteRow.rowId, cleanRow);
           }
-          return Array.from(rowMap.values()).sort((a, b) => a.rowId - b.rowId);
-        });
+
+          return {
+            rowId: remoteRow.rowId,
+            cells: cleanCells,
+            version: remoteRow.version || 'v1',
+          };
+        }).sort((a: TableRow, b: TableRow) => a.rowId - b.rowId);
+
+        setRows(newRows);
       }
 
       if (payload.activity?.data?.rowId) {
@@ -312,11 +310,20 @@ export const AppContent: React.FC = () => {
       setRows((prev) =>
         prev.map((r) => {
           if (r.rowId === payload.rowId) {
-            const updatedCells = payload.row?.cells || payload.cells || {};
+            const rawCells = payload.row?.cells || payload.cells || {};
+            const cleanCells: Record<string, string> = {};
+            if (rawCells && typeof rawCells === 'object') {
+              for (const [k, v] of Object.entries(rawCells)) {
+                if (k !== 'rowId' && k !== 'cells' && k !== 'version' && k !== 'updated_at' && k !== 'updatedAt') {
+                  if (v !== null && v !== undefined && String(v).trim() !== '') {
+                    cleanCells[k] = String(v);
+                  }
+                }
+              }
+            }
             return {
-              ...r,
-              ...updatedCells,
-              cells: updatedCells,
+              rowId: r.rowId,
+              cells: cleanCells,
               version: payload.row?.version || r.version,
             };
           }

@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import hashlib
+import threading
 from typing import List, Dict, Any, Optional
 import gspread
 from google.oauth2.service_account import Credentials
@@ -46,6 +47,7 @@ class GoogleSheetsService:
         self.spreadsheet_id: str = settings.SPREADSHEET_ID
         self.sheet_name: str = settings.SHEET_NAME
         self._columns: List[str] = ["A", "B", "C"]
+        self._write_lock = threading.Lock()
         
         self._init_client()
 
@@ -290,13 +292,19 @@ class GoogleSheetsService:
             columns = list(self._columns)
 
             rows = []
+            last_non_empty_idx = 0
             for idx, row in enumerate(values, start=1):
                 cells = {}
                 concat_vals = []
                 for c_idx, col in enumerate(columns):
-                    val = row[c_idx] if c_idx < len(row) else ""
-                    cells[col] = val
+                    raw_val = row[c_idx] if c_idx < len(row) else ""
+                    val = str(raw_val).strip()
+                    if val != "":
+                        cells[col] = str(raw_val)
                     concat_vals.append(val)
+
+                if cells:
+                    last_non_empty_idx = idx
 
                 version = hashlib.md5("|".join(concat_vals).encode()).hexdigest()[:8]
                 row_obj = {
@@ -304,11 +312,10 @@ class GoogleSheetsService:
                     "cells": cells,
                     "version": version
                 }
-                for col, val in cells.items():
-                    row_obj[col] = val
-
                 rows.append(row_obj)
-            return rows
+
+            # Trim trailing empty rows so empty sheets or trailing cleared rows are not returned as ghost rows
+            return rows[:last_non_empty_idx]
         except Exception as e:
             logger.error(f"Error fetching rows from live Google Sheet: {e}")
             raise e
@@ -360,7 +367,7 @@ class GoogleSheetsService:
 
         if not target:
             # Upsert new row at row_id
-            clean_cells = {col: str(cells.get(col, "")) for col in columns}
+            clean_cells = {col: str(cells[col]) for col in columns if col in cells and str(cells[col]).strip() != ""}
             concat_vals = [clean_cells.get(col, "") for col in columns]
             new_version = hashlib.md5("|".join(concat_vals).encode()).hexdigest()[:8]
 
@@ -369,40 +376,43 @@ class GoogleSheetsService:
                 last_col_letter = col_index_to_letter(len(columns))
                 range_name = f"A{sheet_row_num}:{last_col_letter}{sheet_row_num}"
                 row_values = [clean_cells.get(col, "") for col in columns]
-                self.sheet.update(range_name=range_name, values=[row_values])
+                with self._write_lock:
+                    self.sheet.update(range_name=range_name, values=[row_values])
                 logger.info(f"Upserted live Google Sheet row {sheet_row_num} across range {range_name}")
 
-                result = {"rowId": row_id, "cells": clean_cells, "version": new_version}
-                for col, val in clean_cells.items():
-                    result[col] = val
-                return result
+                return {"rowId": row_id, "cells": clean_cells, "version": new_version}
             except Exception as e:
                 logger.error(f"Error upserting live sheet row {row_id}: {e}")
                 raise e
 
-        # Conflict check across all dynamic columns
+        # Conflict check across ONLY modified columns
         if original_cells and not force:
             target_cells = target.get("cells", {})
             has_conflict = False
-            for col in columns:
-                expected = original_cells.get(col, "")
-                actual = target_cells.get(col, "")
-                if expected != actual:
-                    has_conflict = True
-                    break
+            for col in cells.keys():
+                if col in columns:
+                    expected = original_cells.get(col, "")
+                    actual = target_cells.get(col, "")
+                    if expected != actual:
+                        has_conflict = True
+                        break
 
             if has_conflict:
-                logger.warning(f"Conflict detected on row {row_id} across dynamic columns!")
+                logger.warning(f"Conflict detected on row {row_id} across modified columns!")
                 raise RowConflictException(
                     current_row=target,
                     attempted_values=cells
                 )
 
-        # Merge new cell values
+        # Merge new cell values (sparse: pop if cleared to empty string)
         updated_cells = dict(target.get("cells", {}))
         for col in columns:
             if col in cells:
-                updated_cells[col] = str(cells[col])
+                val = str(cells[col]).strip()
+                if val == "":
+                    updated_cells.pop(col, None)
+                else:
+                    updated_cells[col] = str(cells[col])
 
         concat_vals = [updated_cells.get(col, "") for col in columns]
         new_version = hashlib.md5("|".join(concat_vals).encode()).hexdigest()[:8]
@@ -412,13 +422,11 @@ class GoogleSheetsService:
             last_col_letter = col_index_to_letter(len(columns))
             range_name = f"A{sheet_row_num}:{last_col_letter}{sheet_row_num}"
             row_values = [updated_cells.get(col, "") for col in columns]
-            self.sheet.update(range_name=range_name, values=[row_values])
+            with self._write_lock:
+                self.sheet.update(range_name=range_name, values=[row_values])
             logger.info(f"Updated live Google Sheet row {sheet_row_num} across range {range_name}")
 
-            result = {"rowId": row_id, "cells": updated_cells, "version": new_version}
-            for col, val in updated_cells.items():
-                result[col] = val
-            return result
+            return {"rowId": row_id, "cells": updated_cells, "version": new_version}
         except Exception as e:
             logger.error(f"Error updating live sheet row {row_id}: {e}")
             raise e

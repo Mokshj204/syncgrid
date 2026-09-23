@@ -12,6 +12,7 @@ import {
   addColumn, 
   getChunkedRows, 
   upsertRow, 
+  syncFullSheet,
   deleteRow, 
   getOrCreateUser, 
   getAllUsers, 
@@ -425,8 +426,8 @@ app.post('/api/webhook/sheets', async (req, res) => {
       return res.status(401).json({ status: 'error', message: 'Unauthorized webhook request.' });
     }
 
-    // Persist incoming webhook edit directly into PostgreSQL
-    const targetRowId = rowId || (row ? (row > 1 ? row - 1 : row) : 1);
+    // Persist incoming webhook edit directly into PostgreSQL (1-to-1 rowId mapping)
+    const targetRowId = rowId || row || 1;
     const targetCol = colName || (col ? (typeof col === 'number' ? numToColLetter(col) : String(col)) : 'A');
 
     if (cells && typeof cells === 'object' && Object.keys(cells).length > 0) {
@@ -439,8 +440,8 @@ app.post('/api/webhook/sheets', async (req, res) => {
     const activity = logActivity(
       'webhook',
       'google_apps_script',
-      `Google Sheet edit at Row ${row || targetRowId}, Col ${targetCol}`,
-      { row: row || targetRowId, col: targetCol, value, colName: targetCol }
+      `Google Sheet edit at Row ${targetRowId}, Col ${targetCol}`,
+      { row: targetRowId, col: targetCol, value, colName: targetCol }
     );
 
     io.emit('sheet_updated', {
@@ -479,12 +480,12 @@ app.post('/internal/sync-event', async (req, res) => {
     }
   }
 
-  // Sync rows from Google Sheets poller into PostgreSQL with replace=true so cleared cells/columns are removed
-  if (rows && rows.length > 0 && source !== 'web_edit' && source !== 'web_add') {
-    for (const r of rows) {
-      await upsertRow(r.rowId, r.cells || r, true);
-    }
+  // Sync rows from Google Sheets poller into PostgreSQL (syncFullSheet prunes deleted rows and empties deleted cells)
+  if (source !== 'web_edit' && source !== 'web_add') {
+    await syncFullSheet(rows || []);
   }
+
+  const updatedData = await getChunkedRows(1, 25);
 
   const activity = logActivity(
     'sync',
@@ -492,15 +493,15 @@ app.post('/internal/sync-event', async (req, res) => {
     source === 'google_sheets_direct_edit'
       ? 'Google Sheet edited directly'
       : 'Google Sheet background change synchronization',
-    { rowCount }
+    { rowCount: updatedData.totalRows }
   );
 
   io.emit('sheet_updated', {
     source: source || 'sheets_poller',
     timestamp,
-    columns: columns || [],
-    rows: rows || [],
-    totalRows: rowCount || 0,
+    columns: columns || updatedData.columns,
+    rows: updatedData.rows,
+    totalRows: updatedData.totalRows,
     mode: mode || 'live',
     activity,
   });
@@ -674,12 +675,8 @@ app.post('/api/force-sync', async (req, res) => {
       }
     }
 
-    // 2. Persist fresh Google Sheet rows into PostgreSQL (replace=true to prune deleted cells)
-    if (pyRows && pyRows.length > 0) {
-      for (const r of pyRows) {
-        await upsertRow(r.rowId, r.cells || r, true);
-      }
-    }
+    // 2. Persist fresh Google Sheet rows into PostgreSQL (syncFullSheet prunes deleted rows and empties deleted cells)
+    await syncFullSheet(pyRows || []);
 
     // 3. Return and broadcast updated data
     const data = await getChunkedRows(1, 25);

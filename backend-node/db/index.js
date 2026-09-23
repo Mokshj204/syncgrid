@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 let sql = null;
+export { sql };
 let isConnected = false;
 
 const DEFAULT_COLUMNS = ['A', 'B', 'C'];
@@ -136,6 +137,21 @@ export async function initDb(maxRetries = 3, retryDelayMs = 2000) {
         console.log('[PostgreSQL] Initialized default sheet columns (A, B, C).');
       }
 
+      // Startup cleanup: Purge empty string pairs from existing JSONB cells in database
+      try {
+        await sql`
+          UPDATE sheet_rows
+          SET cells = (
+            SELECT COALESCE(jsonb_object_agg(key, value), '{}'::jsonb)
+            FROM jsonb_each_text(cells)
+            WHERE value IS NOT NULL AND TRIM(value) != ''
+          )
+          WHERE cells IS NOT NULL AND cells != '{}'::jsonb;
+        `;
+      } catch (cleanupErr) {
+        console.warn('[PostgreSQL] Startup empty cells cleanup:', cleanupErr.message);
+      }
+
       isConnected = true;
       return true;
     } catch (err) {
@@ -238,7 +254,6 @@ export async function getChunkedRows(page = 1, limit = 25) {
       rowId: r.row_id,
       cells: r.cells || {},
       version: r.version,
-      ...(r.cells || {}),
     }));
 
     const columns = await getColumns();
@@ -258,42 +273,90 @@ export async function getChunkedRows(page = 1, limit = 25) {
 
 export async function upsertRow(rowId, cells, replace = false) {
   ensureDb();
-  const cleanCells = cells || {};
+
+  // Extract strictly non-empty values for sparse storage
+  const cleanCells = {};
+  const keysToDelete = [];
+
+  if (cells && typeof cells === 'object') {
+    for (const [k, v] of Object.entries(cells)) {
+      if (k !== 'rowId' && k !== 'cells' && k !== 'version' && k !== 'updated_at' && k !== 'updatedAt') {
+        if (v !== null && v !== undefined && String(v).trim() !== '') {
+          cleanCells[k] = String(v);
+        } else {
+          keysToDelete.push(k);
+        }
+      }
+    }
+  }
+
   const version = crypto.createHash('md5').update(JSON.stringify(cleanCells)).digest('hex').substring(0, 8);
 
   try {
-    // When replace is true (e.g. full-sheet sync), replace cells completely so deleted columns/values are purged.
-    // When false (e.g. single cell edit), merge with existing cells.
-    const result = replace
-      ? await sql`
+    let result;
+    if (replace) {
+      // Full row sync: overwrite cells completely with cleanCells (sparse, {} if all cells cleared)
+      result = await sql`
+        INSERT INTO sheet_rows (row_id, cells, version, updated_at)
+        VALUES (${rowId}, ${sql.json(cleanCells)}, ${version}, NOW())
+        ON CONFLICT (row_id) DO UPDATE SET
+          cells = EXCLUDED.cells,
+          version = EXCLUDED.version,
+          updated_at = NOW()
+        RETURNING row_id, cells, version;
+      `;
+    } else {
+      // Partial row edit: if keys were cleared to empty, remove them from JSONB
+      if (keysToDelete.length > 0) {
+        result = await sql`
           INSERT INTO sheet_rows (row_id, cells, version, updated_at)
           VALUES (${rowId}, ${sql.json(cleanCells)}, ${version}, NOW())
           ON CONFLICT (row_id) DO UPDATE SET
-            cells = EXCLUDED.cells,
-            version = EXCLUDED.version,
-            updated_at = NOW()
-          RETURNING row_id, cells, version;
-        `
-      : await sql`
-          INSERT INTO sheet_rows (row_id, cells, version, updated_at)
-          VALUES (${rowId}, ${sql.json(cleanCells)}, ${version}, NOW())
-          ON CONFLICT (row_id) DO UPDATE SET
-            cells = COALESCE(sheet_rows.cells, '{}'::jsonb) || EXCLUDED.cells,
-            version = EXCLUDED.version,
+            cells = (COALESCE(sheet_rows.cells, '{}'::jsonb) - ${keysToDelete}::text[]) || ${sql.json(cleanCells)},
+            version = ${version},
             updated_at = NOW()
           RETURNING row_id, cells, version;
         `;
+      } else {
+        result = await sql`
+          INSERT INTO sheet_rows (row_id, cells, version, updated_at)
+          VALUES (${rowId}, ${sql.json(cleanCells)}, ${version}, NOW())
+          ON CONFLICT (row_id) DO UPDATE SET
+            cells = COALESCE(sheet_rows.cells, '{}'::jsonb) || ${sql.json(cleanCells)},
+            version = ${version},
+            updated_at = NOW()
+          RETURNING row_id, cells, version;
+        `;
+      }
+    }
 
     const updated = result[0];
     return {
       rowId: updated.row_id,
-      cells: updated.cells,
+      cells: updated.cells || {},
       version: updated.version,
-      ...updated.cells,
     };
   } catch (err) {
     console.error('[PostgreSQL] Error upserting row:', err.message);
     throw err;
+  }
+}
+
+export async function syncFullSheet(pyRows = []) {
+  ensureDb();
+  const maxRowId = pyRows.reduce((max, r) => Math.max(max, r.rowId || 0), 0);
+
+  // 1. Upsert all rows from Google Sheets (replace=true to overwrite cells with clean sparse data)
+  for (const r of pyRows) {
+    await upsertRow(r.rowId, r.cells || r, true);
+  }
+
+  // 2. Prune any rows in PostgreSQL that no longer exist in Google Sheets
+  if (maxRowId === 0) {
+    // Sheet is completely empty in Google Sheets -> clear all rows in PostgreSQL
+    await sql`DELETE FROM sheet_rows;`;
+  } else {
+    await sql`DELETE FROM sheet_rows WHERE row_id > ${maxRowId};`;
   }
 }
 

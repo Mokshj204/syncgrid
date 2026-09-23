@@ -233,7 +233,7 @@ export const DataTable: React.FC<DataTableProps> = ({
       setActiveCell({ rowId: externalEditingRowId, col });
       setEditingCell({ rowId: externalEditingRowId, col });
       const existing = rows.find(r => r.rowId === externalEditingRowId);
-      const val = String(existing?.cells?.[col] ?? existing?.[col] ?? '');
+      const val = String(existing?.cells?.[col] ?? '');
       setCellDraftValue(val);
       setOriginalDraftValue(val);
     }
@@ -389,7 +389,7 @@ export const DataTable: React.FC<DataTableProps> = ({
     }
 
     const existingRow = rowMap.get(rowId);
-    const existingVal = String(existingRow?.cells?.[col] ?? existingRow?.[col] ?? '');
+    const existingVal = String(existingRow?.cells?.[col] ?? '');
     const startVal = initialChar !== undefined ? initialChar : existingVal;
 
     setActiveCell({ rowId, col });
@@ -475,7 +475,7 @@ export const DataTable: React.FC<DataTableProps> = ({
   // Clear cell content (Delete / Backspace key on active cell)
   const handleClearCell = async (rowId: number, col: string) => {
     const existingRow = rowMap.get(rowId);
-    const currentVal = String(existingRow?.cells?.[col] ?? existingRow?.[col] ?? '');
+    const currentVal = String(existingRow?.cells?.[col] ?? '');
     if (!currentVal) return;
 
     const currentCells = { ...(existingRow?.cells || {}) };
@@ -862,7 +862,7 @@ export const DataTable: React.FC<DataTableProps> = ({
                     const isCellEditing = editingCell?.rowId === rowId && editingCell?.col === col;
                     const rawVal = isCellEditing 
                       ? cellDraftValue 
-                      : String(rowData?.cells?.[col] ?? rowData?.[col] ?? '');
+                      : String(rowData?.cells?.[col] ?? '');
 
                     const cellFormat = getFormatForCell(col, rowId);
                     const formatted = formatCellValue(rawVal, cellFormat, rowMap);

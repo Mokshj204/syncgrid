@@ -62,7 +62,7 @@ export function getCellValue(ref: string, rowMap: Map<number, TableRow>): string
   if (!parsed) return '';
   const row = rowMap.get(parsed.rowId);
   if (!row) return '';
-  return String(row.cells?.[parsed.col] ?? row[parsed.col] ?? '');
+  return String(row.cells?.[parsed.col] ?? '');
 }
 
 /**
