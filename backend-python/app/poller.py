@@ -120,8 +120,8 @@ class SheetsPoller:
                 if skipped_count > 0:
                     logger.info(f"Skipped {skipped_count} row(s) in cooldown from sync push to Node.js")
 
-                # Only push if there are actual rows to sync
-                if not filtered_rows and source_override == "sheets_poller":
+                # Only skip if rows exist but were all temporarily held in write cooldown
+                if not filtered_rows and len(current_rows) > 0 and source_override == "sheets_poller":
                     return False
 
                 payload = {

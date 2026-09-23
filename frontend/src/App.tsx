@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Navbar } from './components/Navbar';
 import { CapacityLockScreen } from './components/CapacityLockScreen';
 import { DataTable } from './components/DataTable';
@@ -536,7 +536,7 @@ export const AppContent: React.FC = () => {
   };
 
   // Handle Force Manual Sync
-  const handleForceSync = async () => {
+  const handleForceSync = useCallback(async () => {
     try {
       setIsSyncing(true);
       const res = await forceSync();
@@ -546,7 +546,38 @@ export const AppContent: React.FC = () => {
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, [page, limit, loadChunkData]);
+
+  // Track user typing/keyboard activity timestamp
+  const lastActivityTimestampRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    const markActivity = () => {
+      lastActivityTimestampRef.current = Date.now();
+    };
+
+    window.addEventListener('keydown', markActivity, { passive: true });
+    window.addEventListener('input', markActivity, { passive: true });
+
+    return () => {
+      window.removeEventListener('keydown', markActivity);
+      window.removeEventListener('input', markActivity);
+    };
+  }, []);
+
+  // Automatic Force Sync every 15 seconds if nobody is typing
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const isAnyoneTyping = Object.keys(activeTypingMap).length > 0 || Object.keys(activeEditors).length > 0;
+      const isIdle = Date.now() - lastActivityTimestampRef.current >= 15000;
+
+      if (!isAnyoneTyping && isIdle && !isSyncing) {
+        handleForceSync();
+      }
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [activeTypingMap, activeEditors, isSyncing, handleForceSync]);
 
   // Handle nickname update from CollaboratorBar
   const handleUpdateNickname = (nickname: string) => {

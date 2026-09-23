@@ -254,9 +254,19 @@ app.post('/api/formats', async (req, res) => {
 
 // Active row editors map: { [rowId: number]: { socketId: string, username: string } }
 const activeEditors = {};
+let lastTypingTime = Date.now();
+
+function isAnyoneTyping() {
+  if (Object.keys(activeEditors).length > 0) return true;
+  for (const user of activeCollaborators.values()) {
+    if (user.typing) return true;
+  }
+  return false;
+}
 
 // Edit & Submit workflow across dynamic columns with Drizzle persistence
 app.put('/api/rows/:rowId', async (req, res) => {
+  lastTypingTime = Date.now();
   const rowId = parseInt(req.params.rowId, 10);
   const { cells, originalCells, force } = req.body;
 
@@ -797,6 +807,7 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('cell_typing', ({ rowId, col, text }) => {
+    lastTypingTime = Date.now();
     const user = activeCollaborators.get(socket.id);
     if (user) {
       user.focusedCell = { rowId: Number(rowId), col: String(col) };
@@ -854,6 +865,7 @@ io.on('connection', async (socket) => {
   });
 
   socket.on('editing_start', ({ rowId, username }) => {
+    lastTypingTime = Date.now();
     const user = activeCollaborators.get(socket.id);
     activeEditors[rowId] = {
       socketId: socket.id,
@@ -892,6 +904,51 @@ io.on('connection', async (socket) => {
     }
   });
 });
+
+// Automatic Background Force-Sync every 15 seconds if nobody is typing
+setInterval(async () => {
+  try {
+    if (isAnyoneTyping()) return;
+    if (Date.now() - lastTypingTime < 15000) return;
+
+    const sheetsMode = await getSheetsMode();
+    if (sheetsMode === 'disconnected') return;
+
+    const pyRes = await axios.post(`${config.pythonServiceUrl}/api/sheets/force-sync`, {}, { timeout: 12000 }).catch(() => null);
+    if (!pyRes || !pyRes.data) return;
+
+    const pyRows = pyRes.data.rows || [];
+    const pyColumns = pyRes.data.columns || [];
+
+    if (pyColumns && Array.isArray(pyColumns) && pyColumns.length > 0) {
+      try {
+        const existingCols = await getColumns();
+        const existingSet = new Set(existingCols);
+        for (const c of pyColumns) {
+          if (!existingSet.has(c)) {
+            await addColumn(c);
+            existingSet.add(c);
+          }
+        }
+      } catch {}
+    }
+
+    await syncFullSheet(pyRows);
+    const updatedData = await getChunkedRows(1, 25);
+    await updateGoogleSheetsLastSynced();
+
+    io.emit('sheet_updated', {
+      source: 'auto_idle_sync',
+      timestamp: new Date().toISOString(),
+      columns: updatedData.columns,
+      rows: updatedData.rows,
+      totalRows: updatedData.totalRows,
+      mode: sheetsMode,
+    });
+  } catch (err) {
+    // Non-blocking auto-sync
+  }
+}, 15000);
 
 server.listen(config.port, config.host, () => {
   console.log(`Node.js Gateway with Drizzle ORM listening on port ${config.port}`);
