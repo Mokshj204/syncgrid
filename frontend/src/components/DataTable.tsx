@@ -636,14 +636,14 @@ export const DataTable: React.FC<DataTableProps> = ({
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between', 
-          gap: '12px', 
+          gap: '10px', 
           width: '100%',
-          flexWrap: 'nowrap',
+          flexWrap: 'wrap',
           padding: '6px 12px'
         }}
       >
         {/* Left: Active Cell Reference Box, fx icon, and full formula input bar */}
-        <div className="excel-toolbar-left" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+        <div className="excel-toolbar-left" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 240px', minWidth: '200px' }}>
           {/* Active Cell Reference Box (e.g. A1, AA10, BC5 - Editable Name Box to jump to any cell) */}
           <input
             type="text"

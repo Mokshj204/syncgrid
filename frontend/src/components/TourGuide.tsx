@@ -123,23 +123,32 @@ export const TourGuide: React.FC<TourGuideProps> = ({ isOpen, onClose }) => {
   };
 
   // Tooltip dynamic positioning calculation: strictly clamped within viewport
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
+  const cardEstimatedHeight = 260;
+  const cardEstimatedWidth = typeof window !== 'undefined' ? Math.min(400, window.innerWidth - 32) : 380;
+
   let tooltipStyle: React.CSSProperties = {
     position: 'fixed',
     zIndex: 10002,
     maxWidth: '420px',
-    width: '90vw',
+    width: 'calc(100vw - 32px)',
   };
 
   if (rect) {
-    const cardEstimatedHeight = 260;
-    const cardEstimatedWidth = 420;
-
     // Check if element is a huge container (like #tour-table) that takes up most of the screen
     const isLargeContainer = rect.height > window.innerHeight * 0.45;
 
-    if (isLargeContainer) {
-      // For large elements like the whole table, center it cleanly in the upper-middle of viewport
-      tooltipStyle.top = `${Math.max(70, Math.min(window.innerHeight - cardEstimatedHeight - 20, 110))}px`;
+    if (isLargeContainer || isMobile) {
+      // For large elements or mobile devices, center it cleanly in horizontal viewport
+      let topPos: number;
+      if (rect.bottom + cardEstimatedHeight + 20 <= window.innerHeight) {
+        topPos = rect.bottom + 12;
+      } else if (rect.top - cardEstimatedHeight - 12 >= 10) {
+        topPos = rect.top - cardEstimatedHeight - 12;
+      } else {
+        topPos = Math.max(16, (window.innerHeight - cardEstimatedHeight) / 2);
+      }
+      tooltipStyle.top = `${Math.max(10, Math.min(window.innerHeight - cardEstimatedHeight - 10, topPos))}px`;
       tooltipStyle.left = '50%';
       tooltipStyle.transform = 'translateX(-50%)';
     } else {
@@ -157,7 +166,7 @@ export const TourGuide: React.FC<TourGuideProps> = ({ isOpen, onClose }) => {
 
       // Clamp strictly within viewport so the tooltip is ALWAYS 100% visible
       topPos = Math.max(20, Math.min(window.innerHeight - cardEstimatedHeight - 20, topPos));
-      const leftPos = Math.max(20, Math.min(window.innerWidth - cardEstimatedWidth - 20, rect.left + rect.width / 2 - cardEstimatedWidth / 2));
+      const leftPos = Math.max(16, Math.min(window.innerWidth - cardEstimatedWidth - 16, rect.left + rect.width / 2 - cardEstimatedWidth / 2));
 
       tooltipStyle.top = `${topPos}px`;
       tooltipStyle.left = `${leftPos}px`;
@@ -210,7 +219,7 @@ export const TourGuide: React.FC<TourGuideProps> = ({ isOpen, onClose }) => {
         className="glass-panel"
         style={{
           ...tooltipStyle,
-          padding: '22px 24px',
+          padding: isMobile ? '16px 16px' : '22px 24px',
           borderRadius: '18px',
           border: '1px solid rgba(16, 185, 129, 0.4)',
           background: 'rgba(15, 23, 42, 0.94)',

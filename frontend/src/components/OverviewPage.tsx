@@ -196,10 +196,10 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
   const isLiveConnected = Boolean(config.spreadsheetId && pythonInfo?.mode === 'live');
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '24px 20px', width: '100%' }}>
+    <div className="overview-page-wrapper">
       {/* Top Breadcrumb & Action Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <button 
             className="btn btn-sm"
             onClick={onNavigateHome}
@@ -209,10 +209,10 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
             <span>{t('sheetViewBtn')}</span>
           </button>
           <div>
-            <h1 style={{ fontSize: '1.35rem', fontWeight: 600, color: 'var(--text-main)', margin: 0 }}>
+            <h1 className="overview-title" style={{ fontSize: '1.35rem', fontWeight: 600, color: 'var(--text-main)', margin: 0 }}>
               Google Sheets & Database Control Center
             </h1>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+            <p className="overview-subtitle" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
               Manage dynamic sheet binding, inspect remote PostgreSQL persistence, and monitor synchronization health at runtime.
             </p>
           </div>
@@ -268,7 +268,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
       )}
 
       {/* Status Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      <div className="overview-cards-grid">
         {/* Card 1: Remote PostgreSQL Status */}
         <div style={{
           background: 'var(--bg-surface)',
@@ -295,7 +295,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginTop: '14px' }}>
+          <div className="overview-stats-grid">
             <div style={{ background: 'var(--bg-surface-secondary)', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>{stats.totalRows}</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>Rows Persisted</div>
@@ -448,7 +448,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({ onNavigateHome }) =>
             </div>
 
             {/* Sheet Name Input */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="overview-form-two-col">
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '6px' }}>
                   Sheet / Tab Name

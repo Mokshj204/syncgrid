@@ -89,31 +89,31 @@ export const Navbar: React.FC<NavbarProps> = ({
           className="btn btn-sm"
           onClick={onForceSync}
           disabled={isSyncing}
-          title="Force manual synchronization check"
+          title={isSyncing ? t('syncing') : t('forceSyncBtn')}
         >
           <RefreshCw size={13} className={isSyncing ? 'spin-icon' : ''} />
-          <span>{isSyncing ? t('syncing') : t('forceSyncBtn')}</span>
+          <span className="nav-btn-text">{isSyncing ? t('syncing') : t('forceSyncBtn')}</span>
         </button>
 
         <button
           id="tour-history"
           className="btn btn-sm"
           onClick={() => onNavigate?.(currentRoute === '/history' ? '/' : '/history')}
-          title="View audit and synchronization history"
+          title={currentRoute === '/history' ? t('spreadsheetNav') : t('historyNav')}
           style={currentRoute === '/history' ? { borderColor: 'var(--accent-green)', color: 'var(--accent-green)' } : {}}
         >
           <History size={13} color={currentRoute === '/history' ? '#10b981' : '#38bdf8'} />
-          <span>{currentRoute === '/history' ? t('spreadsheetNav') : t('historyNav')}</span>
+          <span className="nav-btn-text">{currentRoute === '/history' ? t('spreadsheetNav') : t('historyNav')}</span>
         </button>
 
         {onOpenTour && (
           <button
             className="btn btn-sm"
             onClick={onOpenTour}
-            title="Launch interactive tour guide"
+            title={t('takeTourBtn')}
           >
             <Compass size={13} color="#10b981" />
-            <span>{t('takeTourBtn')}</span>
+            <span className="nav-btn-text">{t('takeTourBtn')}</span>
           </button>
         )}
       </div>
@@ -122,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div id="tour-collaborators" className="nav-right">
         {/* Collaborators Avatar Stack */}
         {collaborators.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', marginRight: '4px' }}>
+          <div className="collaborator-stack" style={{ display: 'flex', alignItems: 'center', marginRight: '4px' }}>
             {collaborators.map((c, i) => {
               const isMe = c.socketId === currentCollaborator?.socketId;
               const focusInfo = c.focusedCell ? `Row ${c.focusedCell.rowId}, Col ${c.focusedCell.col}` : 'Viewing';
@@ -130,6 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               return (
                 <div
                   key={c.socketId || i}
+                  className="collaborator-avatar"
                   style={{
                     width: '26px',
                     height: '26px',
@@ -172,7 +173,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <input
                   type="text"
                   className="form-control"
-                  style={{ padding: '1px 6px', fontSize: '0.78rem', height: '22px', maxWidth: '110px' }}
+                  style={{ padding: '1px 6px', fontSize: '0.78rem', height: '22px', maxWidth: '100px' }}
                   value={newNick}
                   onChange={(e) => setNewNick(e.target.value)}
                   autoFocus
@@ -184,7 +185,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </form>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ color: currentCollaborator.color }}>{currentCollaborator.nickname}</span>
+                <span className="user-nick-text" style={{ color: currentCollaborator.color }}>{currentCollaborator.nickname}</span>
                 <button
                   style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', display: 'flex', padding: '2px' }}
                   onClick={() => {

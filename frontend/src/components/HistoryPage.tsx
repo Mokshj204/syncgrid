@@ -128,9 +128,9 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
   };
 
   return (
-    <div className="overview-container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px 16px' }}>
+    <div className="overview-container history-page-wrapper" style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px 16px' }}>
       {/* Top Navigation & Back Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <button
           type="button"
           className="btn btn-secondary"
@@ -140,7 +140,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
           <ArrowLeft size={14} /> {t('historyBackBtn')}
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {onForceSync && (
             <button
               type="button"
@@ -179,15 +179,16 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            color: 'var(--accent-green)' 
+            color: 'var(--accent-green)',
+            flexShrink: 0
           }}>
             <History size={20} />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0 }}>
+            <h1 className="history-title" style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0 }}>
               {t('historyTitle')}
             </h1>
-            <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+            <p className="history-subtitle" style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-muted)' }}>
               {t('historySubtitle')}
             </p>
           </div>
@@ -195,7 +196,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="glass-panel" style={{ padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+      <div className="glass-panel history-filter-panel" style={{ padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
         {/* Source Pills */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '0.76rem', color: 'var(--text-dim)', marginRight: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -220,11 +221,11 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
         </div>
 
         {/* Search Box */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', minWidth: '220px' }}>
+        <div className="history-search-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', minWidth: '220px' }}>
           <Search size={13} style={{ position: 'absolute', left: '10px', color: 'var(--text-dim)' }} />
           <input
             type="text"
-            className="form-control"
+            className="form-control history-search-input"
             style={{ paddingLeft: '30px', height: '30px', fontSize: '0.8rem', width: '100%' }}
             placeholder={t('historySearchPlaceholder')}
             value={searchFilter}
@@ -241,7 +242,9 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
           borderBottom: '1px solid var(--border-color)',
           display: 'flex', 
           alignItems: 'center', 
-          justifyContent: 'space-between' 
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
@@ -282,12 +285,12 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
                       {getSourceBadge(log.source)}
-                      <code style={{ fontSize: '0.72rem', background: 'var(--bg-toolbar)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                      <code style={{ fontSize: '0.72rem', background: 'var(--bg-toolbar)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', flexShrink: 0 }}>
                         {log.type}
                       </code>
-                      <span style={{ fontSize: '0.84rem', fontWeight: 500, color: 'var(--text-main)' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: 500, color: 'var(--text-main)', wordBreak: 'break-word' }}>
                         {translateLogDescription(log.description, language)}
                       </span>
                     </div>

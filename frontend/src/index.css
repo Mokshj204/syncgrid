@@ -764,3 +764,228 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-dim);
 }
+
+/* ==========================================================================
+   Responsive Design & Breakpoints (Mobile, Tablet, and Smaller Devices)
+   ========================================================================== */
+
+/* Overview Page Responsive Grid & Form Helpers */
+.overview-page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  width: 100%;
+}
+
+.overview-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.overview-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.overview-form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* History Page Responsive Helpers */
+.history-page-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  width: 100%;
+}
+
+/* Tablet Breakpoint (<= 1024px) */
+@media (max-width: 1024px) {
+  .compact-navbar {
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  .spreadsheet-container {
+    padding: 10px 12px 20px;
+  }
+
+  .excel-toolbar {
+    padding: 6px 10px;
+    gap: 10px;
+  }
+
+  .overview-page-wrapper,
+  .history-page-wrapper {
+    padding: 18px 14px;
+  }
+}
+
+/* Small Tablet & Mobile Breakpoint (<= 768px) */
+@media (max-width: 768px) {
+  .compact-navbar {
+    height: auto;
+    min-height: 50px;
+    padding: 6px 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nav-left {
+    gap: 8px;
+  }
+
+  .nav-center {
+    gap: 6px;
+  }
+
+  .nav-right {
+    gap: 6px;
+  }
+
+  /* Spreadsheet container padding */
+  .spreadsheet-container {
+    padding: 8px 8px 16px;
+    gap: 8px;
+  }
+
+  /* Toolbar wrapping */
+  .excel-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 8px;
+  }
+
+  .excel-toolbar-left {
+    flex: 1 1 100% !important;
+    width: 100%;
+  }
+
+  .excel-toolbar-right {
+    flex: 1 1 100% !important;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  /* Table Grid */
+  .sheet-grid-wrapper {
+    min-height: 380px !important;
+    max-height: calc(100vh - 210px) !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+  }
+
+  .excel-table th,
+  .excel-table td {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+
+  /* History Page */
+  .history-filter-panel {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  .history-search-container {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* Overview Page */
+  .overview-form-two-col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Modals */
+  .modal-content {
+    max-width: calc(100vw - 20px);
+    max-height: calc(100vh - 28px);
+  }
+
+  .modal-header {
+    padding: 12px 14px;
+  }
+
+  .modal-body {
+    padding: 14px 14px;
+  }
+
+  .modal-footer {
+    padding: 10px 14px;
+  }
+}
+
+/* Smartphone & Compact Screen Breakpoint (<= 640px) */
+@media (max-width: 640px) {
+  /* Hide text inside navbar buttons for compact touch-friendly icons */
+  .nav-btn-text {
+    display: none;
+  }
+
+  .compact-navbar .btn {
+    padding: 6px 8px;
+    gap: 0;
+  }
+
+  /* Truncate user nickname so it never overflows */
+  .user-identity-pill {
+    padding: 3px 8px;
+    font-size: 0.74rem;
+  }
+
+  .user-identity-pill .user-nick-text {
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  /* Limit collaborator stack on mobile to preserve top navbar space */
+  .collaborator-stack .collaborator-avatar:nth-child(n+4) {
+    display: none;
+  }
+
+  /* Typography scale */
+  .overview-title,
+  .history-title {
+    font-size: 1.15rem !important;
+  }
+
+  .overview-subtitle,
+  .history-subtitle {
+    font-size: 0.76rem !important;
+  }
+
+  .sheet-logo span {
+    font-size: 0.88rem;
+  }
+}
+
+/* Extra Small Phones (<= 400px) */
+@media (max-width: 400px) {
+  .sheet-logo span {
+    display: none;
+  }
+
+  .cell-name-box {
+    width: 46px !important;
+    font-size: 0.72rem;
+  }
+
+  .overview-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
